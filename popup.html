@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>广告照妖镜</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="head">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <div>
+        <h1>广告照妖镜</h1>
+        <p class="sub">照一照，广告现原形</p>
+      </div>
+    </div>
+    <label class="switch" title="开镜/收镜">
+      <input type="checkbox" id="enabled" />
+      <span class="track"><span class="thumb"></span></span>
+    </label>
+  </header>
+
+  <!-- 功能分页：日报（默认）/ 社媒 / 自定义网站 / key 设置 / 小黑屋 -->
+  <nav class="tabs" role="tablist" aria-label="功能分页">
+    <button type="button" role="tab" id="tabReport" aria-selected="true">照妖日报</button>
+    <button type="button" role="tab" id="tabSocial" aria-selected="false">社媒</button>
+    <button type="button" role="tab" id="tabEC" aria-selected="false">电商</button>
+    <button type="button" role="tab" id="tabCustom" aria-selected="false">自定义网站</button>
+    <button type="button" role="tab" id="tabKey" aria-selected="false">key设置</button>
+    <button type="button" role="tab" id="tabAuthors" aria-selected="false">小黑屋</button>
+  </nav>
+
+  <!-- 默认页：照妖日报 -->
+  <div class="pane" id="paneReport">
+    <section class="report" id="report">
+      <div class="report-head">
+        <span class="report-title">照妖日报</span>
+        <button type="button" class="link" id="copyReport" hidden>抄走战报</button>
+      </div>
+      <div class="stats">
+        <div><b id="checked">0</b><span>照了</span></div>
+        <div><b id="ads" class="is-ad">0</b><span>现形</span></div>
+        <div><b id="folded">0</b><span>收走</span></div>
+        <div><b id="rate">-</b><span>广告浓度</span></div>
+      </div>
+      <p class="kinds" id="kinds" hidden></p>
+      <ul class="wanted" id="wanted" hidden></ul>
+      <p class="report-total" id="reportTotal" hidden></p>
+    </section>
+  </div>
+
+  <!-- 社媒：内置阵地 + 照法 -->
+  <div class="pane" id="paneSocial" hidden>
+    <h2 class="cap">照妖阵地</h2>
+    <section class="field">
+      <p class="kw-note">照微博、小红书和知乎，别的站不掺和。</p>
+      <label class="check">
+        <input type="checkbox" id="wbOn" />
+        <span>照微博<span class="hint">不勾，微博页面完全不动</span></span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="xhsOn" />
+        <span>照小红书<span class="hint">不勾，小红书页面完全不动</span></span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="zhOn" />
+        <span>照知乎<span class="hint">不勾，知乎页面完全不动</span></span>
+      </label>
+    </section>
+
+    <!-- 照到之后 -->
+    <h2 class="cap">照到之后</h2>
+    <section class="field">
+      <div class="seg" data-name="mode" role="radiogroup">
+        <span class="seg-pill" aria-hidden="true"></span>
+        <button role="radio" data-value="label">亮牌照妖</button>
+        <button role="radio" data-value="fold">直接收走</button>
+      </div>
+    </section>
+
+    <!-- 见词就收 -->
+    <h2 class="cap">见词就收</h2>
+    <section class="field">
+      <div class="kw-box" id="kwBox">
+        <ul class="chips" id="chips" aria-label="挂上墙的词"></ul>
+        <input id="kwInput" type="text" maxlength="20" spellcheck="false" placeholder="先抛几个：瘦身、招代理、白酒（回车上墙）" aria-label="添加词" />
+      </div>
+      <p class="kw-note">挂着这些词的内容，照到就直接收走。</p>
+      <label class="check">
+        <input type="checkbox" id="smartMatch" />
+        <span>按意思收<span class="hint">挂"医美"，连"热玛吉变美体验官"也一起照出来</span></span>
+      </label>
+    </section>
+
+    <!-- 照妖火力 -->
+    <h2 class="cap">照妖火力</h2>
+    <section class="field">
+      <div class="seg" data-name="threshold" role="radiogroup">
+        <span class="seg-pill" aria-hidden="true"></span>
+        <button role="radio" data-value="0.8">文火</button>
+        <button role="radio" data-value="0.6">武火</button>
+        <button role="radio" data-value="0.4">三昧真火</button>
+      </div>
+      <p class="kw-note" id="thresholdHint">火越旺，越多疑似广告藏不住</p>
+    </section>
+
+    <!-- 两道法眼 -->
+    <h2 class="cap">两道法眼</h2>
+    <section class="field">
+      <label class="check">
+        <input type="checkbox" id="aiDetect" />
+        <span>验 AI 成色<span class="hint">机器写的稿子，会盖"AI xx%"的小印</span></span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="authorProfiles" />
+        <span>给作者记账<span class="hint">谁三天两头发广告，照几面就记住</span></span>
+      </label>
+    </section>
+  </div>
+
+  <!-- 电商：网购阵地的评论照妖 -->
+  <div class="pane" id="paneEC" hidden>
+    <h2 class="cap">照妖阵地</h2>
+    <section class="field">
+      <p class="kw-note">照淘宝/天猫/京东的商品评论：好评返现来的、刷单水军写的、AI 批量生成的，一眼现形。</p>
+      <label class="check">
+        <input type="checkbox" id="tbOn" />
+        <span>照淘宝/天猫<span class="hint">不勾，淘宝/天猫页面完全不动；勾上，评论区的名字旁亮牌</span></span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="jdOn" />
+        <span>照京东<span class="hint">不勾，京东页面完全不动；勾上，商品评价的名字旁亮牌</span></span>
+      </label>
+    </section>
+  </div>
+
+  <!-- 自定义网站：手写规则，照别的站 -->
+  <div class="pane" id="paneCustom" hidden>
+    <div class="plate">
+      <h2 class="cap">已挂的规矩 · 广告标识</h2>
+      <section class="field">
+        <ul class="rules" id="ruleList"></ul>
+        <p class="kw-note">规则就是一串 CSS 选择器：写清内容条目在哪、标题正文在哪、徽标挂哪。存好后刷新该网页就开照。</p>
+      </section>
+    </div>
+
+    <h2 class="cap" id="ruleFormCap">新挂一个站 · 广告标识</h2>
+    <section class="field">
+      <form class="ruleform" id="ruleForm" autocomplete="off">
+        <div class="rg2">
+          <label class="rf">站点域名<b class="req">*</b>
+            <input id="rHost" type="text" maxlength="60" spellcheck="false" placeholder="ithome.com（直接贴网址也行）" />
+          </label>
+          <label class="rf">备注名
+            <input id="rName" type="text" maxlength="30" spellcheck="false" placeholder="IT之家 · 列表" />
+          </label>
+        </div>
+        <label class="rf">内容条目 · CSS 选择器<b class="req">*</b>
+          <input id="rItem" type="text" maxlength="120" spellcheck="false" placeholder="ul.nl li —— 一条内容的最外层" />
+        </label>
+        <div class="rg2">
+          <label class="rf">标题选择器
+            <input id="rTitle" type="text" maxlength="120" spellcheck="false" placeholder="a" />
+          </label>
+          <label class="rf">正文选择器
+            <input id="rText" type="text" maxlength="120" spellcheck="false" placeholder="#paragraph" />
+          </label>
+        </div>
+        <div class="rg2">
+          <label class="rf">作者选择器
+            <input id="rAuthor" type="text" maxlength="120" spellcheck="false" placeholder="留空当无名氏" />
+          </label>
+          <label class="rf">照到广告后
+            <select id="rFold">
+              <option value="">只亮牌</option>
+              <option value="blur">模糊内容</option>
+              <option value="collapse">折成一行</option>
+              <option value="cover">盖住内容</option>
+            </select>
+          </label>
+        </div>
+        <details class="ruleadv">
+          <summary>高级 · 指纹 / 挂点 / 遮哪（不确定就留默认）</summary>
+          <div class="ruleadv-body">
+            <div class="rg2">
+              <label class="rf">身份指纹
+                <input id="rKey" type="text" maxlength="120" spellcheck="false" placeholder="a@href —— 条目没换就不重照" />
+              </label>
+              <label class="rf">链接选择器
+                <input id="rLink" type="text" maxlength="120" spellcheck="false" placeholder="a —— 给镜子参考" />
+              </label>
+            </div>
+            <div class="rg2">
+              <label class="rf">徽标挂点
+                <input id="rAnchor" type="text" maxlength="120" spellcheck="false" placeholder="a —— 留空挂条目里" />
+              </label>
+              <label class="rf">挂法
+                <select id="rPlacement">
+                  <option value="after">跟在挂点后面</option>
+                  <option value="inside">浮在挂点里面</option>
+                </select>
+              </label>
+            </div>
+            <div class="rg2">
+              <label class="rf">收走时遮住
+                <input id="rBody" type="text" maxlength="120" spellcheck="false" placeholder="#paragraph —— 模糊/盖哪块" />
+              </label>
+              <label class="rf">提示浮层放
+                <input id="rVeil" type="text" maxlength="120" spellcheck="false" placeholder="self 或选择器，默认自动" />
+              </label>
+            </div>
+          </div>
+        </details>
+        <div class="rulebtns">
+          <button type="button" class="link" id="exList">示范 · IT之家列表</button>
+          <button type="button" class="link" id="exDetail">示范 · IT之家文章页</button>
+          <button type="button" class="link" id="ruleReset" hidden>不改了</button>
+          <span class="rgap"></span>
+          <button type="submit" id="ruleSave">挂上</button>
+        </div>
+        <div class="status" id="ruleStatus" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <div class="plate">
+      <h2 class="cap">已屏的规矩 · 屏蔽列表</h2>
+      <section class="field">
+        <ul class="rules" id="blockList"></ul>
+        <p class="kw-note">只按关键词屏列表：撞到词的文章直接处理，不走 AI、不亮牌、不费 key。和上面的「广告标识」互不相干。</p>
+      </section>
+    </div>
+
+    <h2 class="cap" id="blockFormCap">新挂一个站 · 屏蔽列表</h2>
+    <section class="field">
+      <form class="ruleform" id="blockForm" autocomplete="off">
+        <div class="rg2">
+          <label class="rf">站点域名<b class="req">*</b>
+            <input id="bHost" type="text" maxlength="60" spellcheck="false" placeholder="ithome.com（直接贴网址也行）" />
+          </label>
+          <label class="rf">备注名
+            <input id="bName" type="text" maxlength="30" spellcheck="false" placeholder="IT之家 · 屏蔽列表" />
+          </label>
+        </div>
+        <label class="rf">文章条目 · CSS 选择器<b class="req">*</b>
+          <input id="bItem" type="text" maxlength="120" spellcheck="false" placeholder="ul.nl li —— 列表里一条文章的最外层" />
+        </label>
+        <div class="rg2">
+          <label class="rf">取文字处 · 选择器
+            <input id="bText" type="text" maxlength="120" spellcheck="false" placeholder="a —— 撞词看哪段文字，留空用整条" />
+          </label>
+          <label class="rf">撞到关键词后
+            <select id="bStyle">
+              <option value="hide">直接隐藏</option>
+              <option value="blur">模糊看不清</option>
+              <option value="fade">淡成灰色</option>
+            </select>
+          </label>
+        </div>
+        <label class="rf">屏蔽关键词<b class="req">*</b>
+          <textarea id="bKeywords" rows="3" maxlength="600" spellcheck="false"
+            placeholder="一行一个，或用 、 / ， / ; 隔开。例：&#10;罗永浩&#10;618"></textarea>
+        </label>
+        <div class="rulebtns">
+          <button type="button" class="link" id="exBlock">示范 · IT之家列表</button>
+          <button type="button" class="link" id="bReset" hidden>不屏了</button>
+          <span class="rgap"></span>
+          <button type="submit" id="bSave">屏掉</button>
+        </div>
+        <div class="status" id="bStatus" aria-live="polite"></div>
+      </form>
+    </section>
+  </div>
+
+  <!-- key 设置：开光卡（Jev key） -->
+  <div class="pane" id="paneKey" hidden>
+    <section class="keycard" id="keyCard" data-state="loading" aria-live="polite">
+      <div class="keycard-row">
+        <span class="keycard-title" id="keyTitle">看镜…</span>
+        <a class="keycard-link" href="https://docs.typesafe.ai/introduction" target="_blank" rel="noreferrer">哪里领 key</a>
+      </div>
+      <form class="keyform" id="keyForm" autocomplete="off">
+        <span class="keyinput-wrap">
+          <input id="apiKey" type="password" spellcheck="false" placeholder="把 key 贴进镜心" aria-label="Jev API key" />
+          <button type="button" class="eye" id="eye" hidden>显示</button>
+        </span>
+        <button type="submit" id="saveKey">开光</button>
+      </form>
+      <div class="status" id="keyStatus" aria-live="polite"></div>
+      <div class="keycard-foot" id="keyFoot" hidden>key 放进镜心才开始照。它只存在你这台电脑里，不给任何人。</div>
+      <details class="keyadv" id="apiDetails">
+        <summary>换一条路 · 接口地址可自定义</summary>
+        <form class="inline-form" id="apiForm" autocomplete="off">
+          <input id="apiUrl" type="text" spellcheck="false" placeholder="https://api.typesafe.ai/v1/systemone" aria-label="Jev 接口地址" />
+          <button type="submit" id="saveApi">换上</button>
+        </form>
+        <div class="status" id="apiStatus" aria-live="polite"></div>
+      </details>
+    </section>
+  </div>
+
+  <!-- 小黑屋：被收走的作者 -->
+  <div class="pane" id="paneAuthors" hidden>
+    <details class="advanced" id="authorDetails" open>
+      <summary>小黑屋 · 被收走的作者 <span class="hint" id="authorCount"></span></summary>
+      <p class="advanced-note">关进去的人：内容直接收走，不再过镜、不费 key。</p>
+      <ul class="authors" id="authorList"></ul>
+    </details>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

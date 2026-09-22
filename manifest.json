@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "广告照妖镜",
+  "version": "1.0.0",
+  "description": "照一照，广告现原形。用 Jev (TypeSafe System One) 识别小红书、微博、知乎里的硬广软广、淘宝/天猫/京东评论区的好评返现刷评，以及任意自定义站点里的广告和 AI 生成内容，标注 + 一键折叠。自带 API Key，完全免费。",
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "activeTab",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "host_permissions": [
+    "https://api.typesafe.ai/*",
+    "https://*.xiaohongshu.com/*",
+    "https://weibo.com/*",
+    "https://*.weibo.com/*",
+    "https://*.weibo.cn/*",
+    "https://zhihu.com/*",
+    "https://*.zhihu.com/*",
+    "https://taobao.com/*",
+    "https://*.taobao.com/*",
+    "https://tmall.com/*",
+    "https://*.tmall.com/*",
+    "https://jd.com/*",
+    "https://*.jd.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "https://api.typesafe.ai/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "广告照妖镜",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  }
+}

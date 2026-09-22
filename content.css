@@ -1,0 +1,409 @@
+/* 广告照妖镜 · 注入样式。全部以 zyj- 前缀隔离，避免与站点样式冲突。 */
+
+:root {
+  --zyj-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --zyj-font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+
+  --zyj-ad-fg: #d4353b;
+  --zyj-ad-bg: rgba(229, 72, 77, 0.1);
+  --zyj-ad-ring: rgba(229, 72, 77, 0.22);
+  /* 非广告：青竹色"验讫"印章 */
+  --zyj-ok-fg: #3f7d5b;
+  --zyj-ok-bg: rgba(63, 125, 91, 0.08);
+  --zyj-ok-ring: rgba(63, 125, 91, 0.42);
+  --zyj-muted-fg: #9ca3af;
+  --zyj-muted-bg: rgba(156, 163, 175, 0.16);
+  --zyj-warn-fg: #b45309;
+  --zyj-warn-bg: rgba(217, 119, 6, 0.1);
+  --zyj-set-fg: #6d5ae0; /* 还没设置 key：用显眼的行动色 */
+  --zyj-set-bg: rgba(109, 90, 224, 0.1);
+  --zyj-set-ring: rgba(109, 90, 224, 0.28);
+
+  --zyj-tip-bg: #ffffff;
+  --zyj-tip-fg: #1f2328;
+  --zyj-tip-sub: #6b7280;
+  --zyj-tip-track: rgba(0, 0, 0, 0.06);
+  --zyj-tip-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 8px 24px -4px rgba(0, 0, 0, 0.14);
+  --zyj-kw-fg: #4b5563;
+  --zyj-kw-bg: rgba(75, 85, 99, 0.12);
+  --zyj-cover-bg: #f2f2f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --zyj-ad-fg: #ff6b70;
+    --zyj-ad-bg: rgba(255, 99, 105, 0.14);
+    --zyj-ad-ring: rgba(255, 99, 105, 0.3);
+    --zyj-ok-fg: #6bc595;
+    --zyj-ok-bg: rgba(107, 197, 149, 0.14);
+    --zyj-ok-ring: rgba(107, 197, 149, 0.38);
+    --zyj-warn-fg: #f5a524;
+    --zyj-warn-bg: rgba(245, 165, 36, 0.14);
+    --zyj-set-fg: #a293ff;
+    --zyj-set-bg: rgba(162, 147, 255, 0.16);
+    --zyj-set-ring: rgba(162, 147, 255, 0.32);
+    --zyj-tip-bg: #1f2125;
+    --zyj-tip-fg: #eceef0;
+    --zyj-tip-sub: #9ca3af;
+    --zyj-tip-track: rgba(255, 255, 255, 0.08);
+    --zyj-tip-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+    --zyj-kw-fg: #c3c7cf;
+    --zyj-kw-bg: rgba(195, 199, 207, 0.14);
+    --zyj-cover-bg: #26272a;
+  }
+}
+
+/* ---------- 徽标 ---------- */
+
+.zyj-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 5px;
+  font: 600 11px/20px var(--zyj-font);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  color: var(--zyj-ok-fg);
+  background: var(--zyj-ok-bg);
+  transition: transform 160ms var(--zyj-ease-out), background-color 200ms ease, color 200ms ease;
+}
+
+.zyj-badge:active { transform: scale(0.96); }
+.zyj-badge:focus-visible { outline: 2px solid var(--zyj-ad-ring); outline-offset: 1px; }
+
+/* 状态符钉：小菱形。ok 态换成 ✓，像盖了个"验讫"章（一眼区别于原版胶囊+圆点） */
+.zyj-badge::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: currentColor;
+  opacity: 0.65;
+}
+.zyj-badge[data-state="ok"]::before {
+  content: "✓";
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  transform: none;
+  background: none;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+/* AI 味小尾巴：跟在主文案后面，格式相同但更弱化 */
+.zyj-badge .zyj-ai {
+  font-weight: 500;
+  opacity: 0.75;
+  padding-left: 2px;
+}
+.zyj-badge .zyj-ai::before {
+  content: "·";
+  padding-right: 2px;
+  opacity: 0.7;
+}
+
+.zyj-badge[data-state="loading"] { color: var(--zyj-muted-fg); background: transparent; box-shadow: inset 0 0 0 1px var(--zyj-muted-bg); }
+.zyj-badge[data-state="loading"]::before { opacity: 0.45; }
+.zyj-badge[data-state="ok"] { color: var(--zyj-ok-fg); background: var(--zyj-ok-bg); box-shadow: inset 0 0 0 1px var(--zyj-ok-ring); }
+.zyj-badge[data-state="ad"] { color: var(--zyj-ad-fg); background: var(--zyj-ad-bg); box-shadow: inset 0 0 0 1px var(--zyj-ad-ring); }
+.zyj-badge[data-state="error"] { color: var(--zyj-warn-fg); background: var(--zyj-warn-bg); }
+.zyj-badge[data-state="kw"] { color: var(--zyj-kw-fg); background: var(--zyj-kw-bg); }
+.zyj-badge[data-state="no_key"] { color: var(--zyj-set-fg); background: var(--zyj-set-bg); box-shadow: inset 0 0 0 1px var(--zyj-set-ring); }
+.zyj-badge[data-state="blocked"] { color: var(--zyj-muted-fg); background: var(--zyj-muted-bg); }
+
+/* 结果出现时只做一次轻微的淡入缩放，检测中→结果是同一个元素所以不会反复播放 */
+.zyj-badge[data-state="ad"],
+.zyj-badge[data-state="ok"] {
+  animation: zyj-settle 220ms var(--zyj-ease-out);
+}
+@keyframes zyj-settle {
+  from { opacity: 0.4; transform: scale(0.94); }
+}
+
+/* 瀑布流卡片：浮在封面左上角，不改变卡片高度 */
+.zyj-host { position: relative; }
+.zyj-badge[data-placement="inside"] {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  margin: 0;
+  -webkit-backdrop-filter: blur(8px) saturate(1.4);
+  backdrop-filter: blur(8px) saturate(1.4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.zyj-badge[data-placement="inside"][data-state="loading"],
+.zyj-badge[data-placement="inside"][data-state="ok"] { color: #fff; background: rgba(0, 0, 0, 0.35); }
+.zyj-badge[data-placement="inside"][data-state="ad"] { color: #fff; background: rgba(214, 48, 54, 0.88); }
+.zyj-badge[data-placement="inside"][data-state="error"] { color: #fff; background: rgba(180, 83, 9, 0.85); }
+.zyj-badge[data-placement="inside"][data-state="kw"] { color: #fff; background: rgba(60, 64, 72, 0.85); }
+.zyj-badge[data-placement="inside"][data-state="no_key"] { color: #fff; background: rgba(109, 90, 224, 0.9); }
+.zyj-badge[data-placement="inside"][data-state="blocked"] { color: #fff; background: rgba(60, 64, 72, 0.75); }
+.zyj-badge[data-placement="inside"][data-state="loading"] { color: rgba(255, 255, 255, 0.85); background: rgba(0, 0, 0, 0.25); box-shadow: none; }
+
+/* ---------- 折叠：广告（折叠模式下）或命中屏蔽关键词/拉黑作者的内容 ---------- */
+/* 三种样式：collapse 微博真正折叠成一行 · cover 小红书卡片用底色盖住 · blur 小红书详情模糊 */
+
+.zyj-veil { display: none; }
+.zyj-veil-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zyj-veil-action { flex: none; font-weight: 600; }
+
+/* collapse：只留一条折叠栏，其他内容不显示（微博的列表会重新量高度，下面的内容会补上来） */
+.zyj-fold[data-zyj-fold="collapse"]:not(.zyj-reveal) > :not(.zyj-veil) { display: none !important; }
+.zyj-fold[data-zyj-fold="collapse"]:not(.zyj-reveal) > .zyj-veil {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: inherit;
+  font: 13px/20px var(--zyj-font);
+  text-align: left;
+  color: var(--zyj-muted-fg);
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 150ms ease;
+}
+.zyj-fold[data-zyj-fold="collapse"] > .zyj-veil::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--zyj-ad-fg);
+  opacity: 0.8;
+}
+.zyj-fold[data-zyj-fold="collapse"] > .zyj-veil .zyj-veil-text { flex: 1; }
+.zyj-fold[data-zyj-fold="collapse"] > .zyj-veil .zyj-veil-action { color: var(--zyj-tip-fg); }
+@media (hover: hover) and (pointer: fine) {
+  .zyj-fold[data-zyj-fold="collapse"] > .zyj-veil:hover { background: var(--zyj-tip-track); }
+}
+.zyj-fold[data-zyj-fold="collapse"] > .zyj-veil:focus-visible { outline: 2px solid var(--zyj-ad-ring); outline-offset: -2px; }
+
+/* cover：瀑布流卡片不能变矮，用底色盖住封面和标题 */
+.zyj-fold[data-zyj-fold="cover"] .zyj-body { transition: opacity 200ms ease; }
+.zyj-fold[data-zyj-fold="cover"]:not(.zyj-reveal) .zyj-body { opacity: 0; }
+.zyj-fold[data-zyj-fold="cover"] .zyj-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  border-radius: inherit;
+  font: 12px/18px var(--zyj-font);
+  text-align: center;
+  color: var(--zyj-tip-sub);
+  background: var(--zyj-cover-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* 展开：盖板淡出后再隐藏，避免挡住点击 */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 160ms ease, visibility 0s linear 160ms;
+}
+.zyj-fold[data-zyj-fold="cover"]:not(.zyj-reveal) .zyj-veil {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 200ms ease;
+}
+@starting-style {
+  .zyj-fold[data-zyj-fold="cover"]:not(.zyj-reveal) .zyj-veil { opacity: 0; }
+}
+.zyj-fold[data-zyj-fold="cover"] .zyj-veil .zyj-veil-text { white-space: normal; }
+.zyj-fold[data-zyj-fold="cover"] .zyj-veil .zyj-veil-action { color: var(--zyj-tip-fg); }
+
+/* blur：小红书笔记详情（用户主动点开的），模糊 + 中间的提示 */
+.zyj-fold[data-zyj-fold="blur"] .zyj-body { transition: filter 220ms var(--zyj-ease-out), opacity 220ms ease; }
+.zyj-fold[data-zyj-fold="blur"]:not(.zyj-reveal) .zyj-body {
+  filter: blur(12px) saturate(0.8);
+  opacity: 0.6;
+  cursor: pointer;
+  user-select: none;
+}
+.zyj-fold[data-zyj-fold="blur"] .zyj-veil {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 80%;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  font: 600 12px/18px var(--zyj-font);
+  color: #fff;
+  background: rgba(214, 48, 54, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.96);
+  transition: opacity 150ms ease, transform 160ms var(--zyj-ease-out), visibility 0s linear 150ms;
+}
+.zyj-fold[data-zyj-fold="blur"]:not(.zyj-reveal) .zyj-veil {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  transition: opacity 200ms ease, transform 200ms var(--zyj-ease-out);
+}
+@starting-style {
+  .zyj-fold[data-zyj-fold="blur"]:not(.zyj-reveal) .zyj-veil { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}
+.zyj-fold[data-zyj-fold="blur"] .zyj-veil .zyj-veil-action { opacity: 0.85; font-weight: 500; }
+.zyj-fold[data-zyj-fold="blur"]:not(.zyj-reveal) .zyj-veil:active { transform: translate(-50%, -50%) scale(0.97); }
+
+/* 折叠成一行的展开/收起动画在 content.js 里（clip-path），只在屏幕里、用户看得见时才播放 */
+
+/* ---------- 详情浮层 ---------- */
+
+.zyj-tip {
+  position: fixed;
+  z-index: 2147483646;
+  width: 264px;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 10px;
+  font: 12px/1.5 var(--zyj-font);
+  color: var(--zyj-tip-fg);
+  background: var(--zyj-tip-bg);
+  box-shadow: var(--zyj-tip-shadow);
+  pointer-events: none;
+  transform-origin: var(--origin, top left);
+  opacity: 0;
+  transform: scale(0.97);
+  transition: opacity 120ms ease, transform 120ms var(--zyj-ease-out);
+}
+/* 首次悬停先等一会儿，防止滚动经过时误触发 */
+.zyj-tip[data-open="true"] {
+  opacity: 1;
+  transform: none;
+  transition: opacity 150ms ease 250ms, transform 180ms var(--zyj-ease-out) 250ms;
+}
+/* 刚看过一个，再看相邻的就立即出现 */
+.zyj-tip[data-instant="true"][data-open="true"] { transition-duration: 0ms; transition-delay: 0ms; }
+
+/* 浮层内可交互（拉黑按钮）时必须开 pointer-events */
+.zyj-tip[data-open="true"]:has(.zyj-tip-block) { pointer-events: auto; }
+
+.zyj-tip-head { display: flex; align-items: baseline; justify-content: space-between; color: var(--zyj-tip-sub); }
+.zyj-tip-head strong { font-size: 20px; font-weight: 650; line-height: 1.2; color: var(--zyj-tip-fg); font-variant-numeric: tabular-nums; }
+.zyj-tip-head strong[data-ad="true"] { color: var(--zyj-ad-fg); }
+
+.zyj-meter { height: 4px; margin: 8px 0 10px; border-radius: 2px; background: var(--zyj-tip-track); overflow: hidden; }
+.zyj-meter i { display: block; height: 100%; width: var(--w); border-radius: 2px; background: var(--zyj-ok-fg); }
+.zyj-meter[data-ad="true"] i { background: var(--zyj-ad-fg); }
+
+.zyj-rows { display: grid; gap: 4px; }
+.zyj-row { display: grid; grid-template-columns: 78px 1fr 34px; align-items: center; gap: 8px; color: var(--zyj-tip-sub); }
+.zyj-row i { height: 3px; border-radius: 2px; background: linear-gradient(to right, currentColor var(--w), var(--zyj-tip-track) var(--w)); opacity: 0.6; }
+.zyj-row b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+.zyj-row.is-top { color: var(--zyj-tip-fg); }
+.zyj-row.is-top b { font-weight: 650; }
+
+.zyj-tip-sub { margin: 10px 0 4px; color: var(--zyj-tip-sub); }
+.zyj-tip-err { margin-top: 4px; color: var(--zyj-warn-fg); word-break: break-all; }
+.zyj-tip-foot { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--zyj-tip-track); color: var(--zyj-tip-sub); }
+
+/* 作者档案 + 一键拉黑 */
+.zyj-tip-author { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.zyj-tip-author > span { min-width: 0; }
+.zyj-tip-block {
+  flex: none;
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 999px;
+  font: 600 11px/18px var(--zyj-font);
+  color: #fff;
+  background: var(--zyj-ad-fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.zyj-tip-block:hover { opacity: 0.88; }
+.zyj-tip-block:active { transform: scale(0.96); }
+.zyj-tip-block:focus-visible { outline: 2px solid var(--zyj-ad-ring); outline-offset: 1px; }
+.zyj-tip-block[disabled] { background: var(--zyj-ok-fg); cursor: default; opacity: 0.7; }
+
+/* ---------- 右键识别结果提示 ---------- */
+
+.zyj-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  z-index: 2147483647;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font: 500 13px/20px var(--zyj-font);
+  color: var(--zyj-tip-fg);
+  background: var(--zyj-tip-bg);
+  box-shadow: var(--zyj-tip-shadow);
+  transform: translateX(-50%);
+  transition: opacity 200ms ease, transform 200ms var(--zyj-ease-out);
+}
+@starting-style {
+  .zyj-toast { opacity: 0; transform: translate(-50%, 8px); }
+}
+.zyj-toast[data-leaving="true"] { opacity: 0; transform: translate(-50%, 4px); transition-duration: 150ms; }
+.zyj-toast::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  vertical-align: 1px;
+  background: var(--zyj-ok-fg);
+}
+.zyj-toast[data-state="ad"]::before { background: var(--zyj-ad-fg); }
+.zyj-toast[data-state="error"]::before { background: var(--zyj-warn-fg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .zyj-badge[data-state="ad"],
+  .zyj-badge[data-state="ok"] { animation: none; }
+  .zyj-tip,
+  .zyj-tip[data-open="true"] { transform: none; }
+  .zyj-fold[data-zyj-fold="blur"] .zyj-body { transition: opacity 150ms ease; }
+  .zyj-fold[data-zyj-fold="blur"] .zyj-veil,
+  .zyj-fold[data-zyj-fold="blur"] .zyj-veil:active,
+  .zyj-fold[data-zyj-fold="blur"]:not(.zyj-reveal) .zyj-veil { transform: translate(-50%, -50%); }
+  .zyj-toast,
+  .zyj-toast[data-leaving="true"] { transform: translateX(-50%); }
+  @starting-style { .zyj-toast { transform: translateX(-50%); } }
+}
+
+/* ---------- 独立屏蔽文章列表（自定义规则）：不入照妖流程，撞到关键词由 CSS 直接处理 ---------- */
+
+[data-zyj-block="hide"] { display: none !important; }
+[data-zyj-block="blur"] { filter: blur(5px) saturate(0.5); opacity: 0.5; pointer-events: none; }
+[data-zyj-block="fade"] { opacity: 0.18; filter: grayscale(1); transition: opacity 200ms ease, filter 200ms ease; }
+[data-zyj-block="fade"]:hover { opacity: 0.75; filter: grayscale(0.4); } /* 淡化的留个门：想看还是能瞄一眼 */
+@media (prefers-reduced-motion: reduce) { [data-zyj-block="fade"] { transition: none; } }
